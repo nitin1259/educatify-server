@@ -30,7 +30,7 @@ func init() {
 	fmt.Println(dbURI)
 
 	conn, err := gorm.Open("postgres", dbURI)
-	defer conn.Close()
+	// defer conn.Close()
 
 	if err != nil {
 		fmt.Printf("Error while connecting to db : %s ", err)
@@ -38,7 +38,7 @@ func init() {
 	}
 
 	db = conn
-	// db.Debug().AutoMigrate(&Account{}, &Contact{}) //Database migration
+	db.Debug().AutoMigrate(&User{}) //Database migration
 
 }
 

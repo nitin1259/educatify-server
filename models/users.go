@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
@@ -28,10 +29,10 @@ type User struct {
 
 //validate incoming user details
 func (user *User) Validate() (map[string]interface{}, bool) {
-
-	err := u.ValidateHost(user.Email)
-	if smtpErr, ok := err.(u.SmtpError); ok && err != nil {
-		msg := fmt.Sprintf("Code: %s, Msg: %s", smtpErr.Code(), smtpErr)
+	log.Printf("In users: Validate method- email:%s, password:%s", user.Email, user.Password)
+	err := u.ValidateFormat(user.Email)
+	if err != nil {
+		msg := fmt.Sprintf("Msg: %s", err)
 		return u.Message(false, msg), false
 	}
 
@@ -56,7 +57,7 @@ func (user *User) Validate() (map[string]interface{}, bool) {
 }
 
 func (user *User) Create() map[string]interface{} {
-
+	fmt.Printf("users Create method email:%s, password:%s ", user.Email, user.Password)
 	if resp, ok := user.Validate(); !ok {
 		return resp
 	}

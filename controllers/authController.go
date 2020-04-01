@@ -10,8 +10,8 @@ import (
 )
 
 var CreateUser = func(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Controller method: Create user")
-	user := models.User{}
+	log.Printf("Controller method: Create user body: %s", r.Body)
+	user := &models.User{}
 
 	err := json.NewDecoder(r.Body).Decode(user) //decode the request body into struct and failed if any error occur
 
@@ -30,7 +30,7 @@ var CreateUser = func(w http.ResponseWriter, r *http.Request) {
 
 var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 
-	user := models.User{}
+	user := &models.User{}
 
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {

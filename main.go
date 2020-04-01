@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/nitin1259/educatify-server/app"
 	"github.com/nitin1259/educatify-server/controllers"
 )
 
@@ -20,10 +21,10 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homeLink)
-	router.HandleFunc("/api/user/new", controllers.CreateUser).Methods("POST")
+	router.HandleFunc("/api/user/new/", controllers.CreateUser).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Authenticate).Methods("POST")
 
-	// router.Use(app.JwtAuthentication) //attach JWT auth middleware
+	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 
 	//Get port from .env file, we did not specify any port so this should return an empty string when tested locally
 	port := os.Getenv("PORT")
