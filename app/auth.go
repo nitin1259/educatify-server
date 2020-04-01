@@ -3,34 +3,37 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/nitin1259/educatify-server/models"
 	u "github.com/nitin1259/educatify-server/utils"
 )
 
 var JwtAuthentication = func(next http.Handler) http.Handler {
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		noAuth := []string{"/api/user/new", "api/user/login"} //List of endpoints that doesn't require auth
-		requestpath := r.URL.Path                             //current path
+		notAuth := []string{"/", "/api/user/new/", "/api/user/login/"} //List of endpoints that doesn't require auth
+		requestPath := r.URL.Path                                      //current request path
 
+		log.Printf("Coming to jwt authentication with request: %s", requestPath)
 		//check if request does not need authentication, serve the request if it doesn't need it
-		for _, path := range noAuth {
-
-			if path == requestpath {
+		for _, value := range notAuth {
+			if value == requestPath {
+				log.Printf("matching value reqestpath: %s and noAuth: %s", requestPath, value)
 				next.ServeHTTP(w, r)
 				return
 			}
 		}
 
 		response := make(map[string]interface{})
+		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
 
-		tokenHeader := r.Header.Get("Authorization") // grab the token from header...
-
-		if tokenHeader == "" { // if token is missing, return with error code 403 Unauthorized.
+		if tokenHeader == "" { //Token is missing, returns with error code 403 Unauthorized
 			response = u.Message(false, "Missing auth token")
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
@@ -38,7 +41,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			return
 		}
 
-		splitted := strings.Split(tokenHeader, "") ////The token normally comes in format `Bearer {token-body}`, we check if the retrieved token matched this requirement
+		splitted := strings.Split(tokenHeader, " ") //The token normally comes in format `Bearer {token-body}`, we check if the retrieved token matched this requirement
 		if len(splitted) != 2 {
 			response = u.Message(false, "Invalid/Malformed auth token")
 			w.WriteHeader(http.StatusForbidden)
@@ -48,35 +51,32 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		}
 
 		tokenPart := splitted[1] //Grab the token part, what we are truly interested in
-		tk := &models.token{}
+		tk := &models.Token{}
 
-		token, err := jwt.ParseWithClaims(tokenPart, tk, func(token *jwt.Token) (interface{}, err) {
+		token, err := jwt.ParseWithClaims(tokenPart, tk, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("token_password")), nil
 		})
 
 		if err != nil { //Malformed token, returns with http code 403 as usual
-
-			response = u.Message(false, "Malformed Authentication token")
-			w.WriteHeader(http.StatusForbidden)
-			w.Header().Set("Content-Type", "application/json")
-			u.Respond(w, response)
-			return
-		}
-
-		if !token.Valid { //Token is invalid, maybe not signed on this server
-			response = u.Message(false, "Token is not valid")
+			response = u.Message(false, "Malformed authentication token")
 			w.WriteHeader(http.StatusForbidden)
 			w.Header().Add("Content-Type", "application/json")
 			u.Respond(w, response)
 			return
 		}
 
-		// Everything went well, proceed with the request and set the caller to the user retrieved from the parsed token
-		fmt.Sprintf("User: %", tk.Username) //useful for monitoring
+		if !token.Valid { //Token is invalid, maybe not signed on this server
+			response = u.Message(false, "Token is not valid.")
+			w.WriteHeader(http.StatusForbidden)
+			w.Header().Add("Content-Type", "application/json")
+			u.Respond(w, response)
+			return
+		}
 
-		ctx := context.WithValue(r.Context(), "user", tk.UserId)
+		//Everything went well, proceed with the request and set the caller to the user retrieved from the parsed token
+		fmt.Sprintf("User %", tk.UserID) //Useful for monitoring
+		ctx := context.WithValue(r.Context(), "user", tk.UserID)
 		r = r.WithContext(ctx)
-
-		next.ServeHTTP(w, r) // proceed in the middleware chain
+		next.ServeHTTP(w, r) //proceed in the middleware chain!
 	})
 }
