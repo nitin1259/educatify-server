@@ -85,7 +85,7 @@ func (user *User) Create() map[string]interface{} {
 }
 
 func Login(email, password string) map[string]interface{} {
-
+	log.Printf("In users: Login method- email:%s, password:%s", email, password)
 	user := &User{}
 
 	err := GetDB().Table("users").Where("email=?", email).First(user).Error

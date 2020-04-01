@@ -29,7 +29,7 @@ var CreateUser = func(w http.ResponseWriter, r *http.Request) {
 }
 
 var Authenticate = func(w http.ResponseWriter, r *http.Request) {
-
+	log.Print("Authenticate method: login request")
 	user := &models.User{}
 
 	err := json.NewDecoder(r.Body).Decode(user)

@@ -22,7 +22,7 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/api/user/new/", controllers.CreateUser).Methods("POST")
-	router.HandleFunc("/api/user/login", controllers.Authenticate).Methods("POST")
+	router.HandleFunc("/api/user/login/", controllers.Authenticate).Methods("POST")
 
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 
