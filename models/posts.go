@@ -54,3 +54,30 @@ func (post *Post) Create() map[string]interface{} {
 
 	return resp
 }
+
+func GetPostById(id uint) *Post {
+
+	post := &Post{}
+
+	err := GetDB().Table("posts").Where("id=?", id).First(post).Error
+
+	if err != nil {
+		return nil
+	}
+
+	return post
+}
+
+func GetAllPosts(userid uint) []*Post {
+
+	posts := make([]*Post, 0)
+
+	err := GetDB().Table("posts").Where("auther_id=?", userid).Find(&posts).Error
+
+	if err != nil {
+		log.Printf("Error wile getting posts from db: %s", err)
+		return nil
+	}
+
+	return posts
+}

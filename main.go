@@ -23,7 +23,9 @@ func main() {
 	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/api/user/new/", controllers.CreateUser).Methods("POST")
 	router.HandleFunc("/api/user/login/", controllers.Authenticate).Methods("POST")
-	router.HandleFunc("/api/post/create/", controllers.CreatePost).Methods("POST")
+	router.HandleFunc("/api/post/new/", controllers.CreatePost).Methods("POST")
+	router.HandleFunc("/api/user/posts/", controllers.GetAllPosts).Methods("GET")
+	router.HandleFunc("/api/user/posts/{id}", controllers.GetPost).Methods("GET")
 
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 
