@@ -38,7 +38,7 @@ func init() {
 	}
 
 	db = conn
-	db.Debug().AutoMigrate(&User{}) //Database migration
+	db.Debug().AutoMigrate(&User{}, &Post{}) //Database migration
 
 }
 

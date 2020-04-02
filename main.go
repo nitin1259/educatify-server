@@ -12,17 +12,18 @@ import (
 )
 
 func homeLink(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome home!")
+	fmt.Fprintf(w, "Welcome to Educatify!")
 }
 
 // func main is just a function name but when used with package main, it serves as the application entry point.
 func main() {
 	fmt.Println("Welcome to educatify !")
 
-	router := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter()
 	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/api/user/new/", controllers.CreateUser).Methods("POST")
 	router.HandleFunc("/api/user/login/", controllers.Authenticate).Methods("POST")
+	router.HandleFunc("/api/post/create/", controllers.CreatePost).Methods("POST")
 
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 
@@ -30,7 +31,7 @@ func main() {
 	port := os.Getenv("PORT")
 
 	if port == "" {
-		port = "5656" //localhost
+		port = "8000" //localhost
 	}
 
 	fmt.Println(port)
